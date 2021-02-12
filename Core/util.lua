@@ -10,8 +10,10 @@ RS = {
         AQ40 = 1005,
         NAXXRAMAS = 1006
     },
-    GetData = function(self, region, server, player)
-        local data = RS_Dataset[region][server][player]
+    GetData = function(self, server, player)
+        local data = RS_Dataset[server]
+        if not data then return nil end
+        data = data[player]
         if not data then return nil end
         return {
             GetZone = function(self, zone)
@@ -19,13 +21,16 @@ RS = {
                 local zoneData = data[zone]
                 return {
                     GetRole = function(self)
-                        return zoneData[1]
+                        return RS_Specs[zoneData[1]]
                     end,
-                    GetProgression = function(self)
+                    GetRoleProgression = function(self)
                         return zoneData[2]
                     end,
-                    GetRating = function(self)
+                    GetTotalProgression = function(self)
                         return zoneData[3]
+                    end,
+                    GetRating = function(self)
+                        return zoneData[4]
                     end
                 }
             end
@@ -37,10 +42,10 @@ RS = {
     GetMaxProgression = function(self, zone)
         if not self.maxProgressions then
             self.maxProgressions = {}
-            for _, serverData in pairs(RS_Dataset[self:GetRegion()]) do
+            for _, serverData in pairs(RS_Dataset) do
                 for _, playerData in pairs(serverData) do
                     for zoneID, zoneData in pairs(playerData) do
-                        local progression = zoneData[2]
+                        local progression = zoneData[3]
                         if self.maxProgressions[zoneID] == nil or self.maxProgressions[zoneID] < progression then
                             self.maxProgressions[zoneID] = progression
                         end
@@ -50,8 +55,16 @@ RS = {
         end
         return self.maxProgressions[zone]
     end,
-    GetRegion = function(self)
-        return RS_Dataset.REGION
+    IsDeveloper = function(self, server, name)
+        if server ~= 'Пламегор' then return false end
+        if not self.developers then
+            local developers = {'Махич', 'Коровобог', 'Шелкопрядица'}
+            self.developers = {}
+            for k, v in pairs(developers) do
+                self.developers[v] = true
+            end
+        end
+        return self.developers[name] or false
     end,
     GetServer = function(self)
         return GetRealmName()

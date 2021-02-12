@@ -1,10 +1,3 @@
-local function formatRole(role)
-    if role == RS.Role.TANK then return 'Танк'
-    elseif role == RS.Role.HEALER then return 'Целитель'
-    elseif role == RS.Role.DAMAGE_DEALER then return 'ДД'
-    else return 'Неизвестная роль' end
-end
-
 local function getColorByRating(rating)
     local percentage = rating / RS:GetMaxScore()
     if percentage >= 0.99 then return '|cffe268a8'
@@ -19,10 +12,19 @@ local function addZone(data, zone, translation)
     local maxProgression = RS:GetMaxProgression(zone)
     zone = data:GetZone(zone)
     if zone == nil then return end
-    local role, progression, rating = zone:GetRole(), zone:GetProgression(), zone:GetRating()
+    local role, roleProgression, totalProgression, rating = zone:GetRole(), zone:GetRoleProgression(), zone:GetTotalProgression(), zone:GetRating()
 
+    local roleString = roleProgression .. '/' .. maxProgression
+    if role ~= 'None' then roleString = role .. ' ' .. roleString end
+
+    local left
+    if roleProgression == totalProgression then
+        left = string.format('%s (%s)', translation, roleString)
+    else
+        left = string.format('%s (%s, всего %d/%d)', translation, roleString, totalProgression, maxProgression)
+    end
     GameTooltip:AddDoubleLine(
-        string.format('%s (%s, %d/%d)', translation, formatRole(role), progression, maxProgression),
+        left,
         string.format('%s%d рейтинга', getColorByRating(rating), rating)
     )
 end
@@ -33,11 +35,15 @@ C_Timer.After(1, function()
         if not unit or not UnitIsPlayer(unit) then return end
         local name, realm = UnitName(unit)
         if realm == nil then realm = RS:GetServer() end
-        local data = RS:GetData(RS:GetRegion(), realm, name)
+        local data = RS:GetData(realm, name)
         if data == nil then return end
 
         GameTooltip:AddLine(' ')
-        GameTooltip:AddLine('|cffffffffRaiding Scores')
+        if RS:IsDeveloper(realm, name) then
+            GameTooltip:AddDoubleLine('|cffffffffRaiding Scores', '|cff00aaaaРазработчик')
+        else
+            GameTooltip:AddLine('|cffffffffRaiding Scores')
+        end
         addZone(data, RS.Zone.NAXXRAMAS, 'Наксрамас')
         addZone(data, RS.Zone.AQ40, 'Храм Ан\'Киража')
         addZone(data, RS.Zone.BLACK_WING_LAIR, 'Логово Крыла Тьмы')
