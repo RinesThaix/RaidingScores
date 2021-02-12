@@ -1,7 +1,7 @@
 ## Interface: 11306
 ## Title: Raiding Scores
 ## Notes: Shows raiding scores for characters
-## Notes-ruRU: Позволяет просматривать очки рейдинга у игроков.
+## Notes-ruRU: Позволяет просматривать очки рейдинга у игроков!
 ## Author: Konstantin Shandurenko
 ## Version: 1.0.1.2
 
