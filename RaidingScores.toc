@@ -3,7 +3,7 @@
 ## Notes: Shows raiding scores for characters
 ## Notes-ruRU: Позволяет просматривать очки рейдинга у игроков.
 ## Author: Konstantin Shandurenko
-## Version: 1.0.1.51
+## Version: 1.0.1.52
 
 DB/ru.lua
 
